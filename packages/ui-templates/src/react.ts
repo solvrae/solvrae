@@ -114,6 +114,10 @@ export function planReactUiPackage(opts: UiTemplateOptions): Action[] {
       'packages/ui-react/tsconfig.json',
       json({
         extends: `${scope}/typescript-config/react-library.json`,
+        compilerOptions: {
+          baseUrl: '.',
+          paths: { [`${scope}/ui-react/*`]: ['./src/*'] },
+        },
         include: ['src'],
         exclude: ['node_modules', 'dist'],
       }),

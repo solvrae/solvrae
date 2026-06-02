@@ -116,6 +116,10 @@ export function planVueUiPackage(opts: UiTemplateOptions): Action[] {
       'packages/ui-vue/tsconfig.json',
       json({
         extends: `${scope}/typescript-config/base.json`,
+        compilerOptions: {
+          baseUrl: '.',
+          paths: { [`${scope}/ui-vue/*`]: ['./src/*'] },
+        },
         include: ['src'],
         exclude: ['node_modules'],
       }),

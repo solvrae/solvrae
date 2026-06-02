@@ -9,6 +9,12 @@ export { type BaseRepoOptions, planBaseRepo } from './base';
 export { type InitOptions, planInit } from './init';
 export { type AddTemplateOptions, type AddTemplateResult, planAddTemplate } from './add-template';
 export {
+  type AddComponentOptions,
+  type ComponentTask,
+  REGISTRY_CLI,
+  planComponentTasks,
+} from './add-component';
+export {
   inferScope,
   hasUiPackage,
   hasThemePackage,

@@ -90,6 +90,10 @@ export function planSvelteUiPackage(opts: UiTemplateOptions): Action[] {
         },
         devDependencies: {
           [`${scope}/typescript-config`]: 'workspace:*',
+          // shadcn-svelte's CLI requires svelte + tailwindcss to be resolvable
+          // from this package when adding components.
+          svelte: '^5',
+          tailwindcss: '^4',
           typescript: '^5.7.2',
         },
       }),
@@ -121,6 +125,10 @@ export function planSvelteUiPackage(opts: UiTemplateOptions): Action[] {
       'packages/ui-svelte/tsconfig.json',
       json({
         extends: `${scope}/typescript-config/base.json`,
+        compilerOptions: {
+          baseUrl: '.',
+          paths: { [`${scope}/ui-svelte/*`]: ['./src/*'] },
+        },
         include: ['src'],
         exclude: ['node_modules'],
       }),

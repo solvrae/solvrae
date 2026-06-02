@@ -1,14 +1,16 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { cancel, intro, log, outro } from '@clack/prompts';
+import { cancel, intro, isCancel, log, multiselect, outro } from '@clack/prompts';
 import {
   type PackageManager,
+  type UiFamily,
   createConsoleLogger,
   createExecutorDeps,
   createRegistryResolver,
   detectPackageManager,
   executePlan,
   findRepoRoot,
+  nodeCommandRunner,
   nodeFileSystem,
   offlineResolver,
 } from '@solvrae/core';
@@ -16,6 +18,7 @@ import {
   type AddTemplateOptions,
   availableTemplates,
   planAddTemplate,
+  planComponentTasks,
   presentUiFamilies,
 } from '@solvrae/scaffold';
 import { Command } from 'commander';
@@ -128,6 +131,83 @@ async function runDoctor(): Promise<void> {
   outro('Doctor finished.');
 }
 
+interface AddComponentFlags {
+  family: string[];
+  all: boolean;
+  overwrite: boolean;
+  pm?: string;
+  yes: boolean;
+  dryRun: boolean;
+}
+
+function collectFamily(value: string, previous: string[]): string[] {
+  return [...previous, value];
+}
+
+async function runAddComponent(components: string[], flags: AddComponentFlags): Promise<void> {
+  intro(pc.bold(pc.cyan(' solvrae add component ')));
+  const repoRoot = await getRepoRoot();
+  const present = await presentUiFamilies(repoRoot);
+  if (present.length === 0) {
+    bail('No UI packages found. Run `solvrae add template <id>` first.');
+  }
+
+  let targets: UiFamily[];
+  if (flags.family.length > 0) {
+    const invalid = flags.family.filter((f) => !present.includes(f as UiFamily));
+    if (invalid.length > 0) {
+      bail(`Family not present: ${invalid.join(', ')}. Present: ${present.join(', ')}.`);
+    }
+    targets = flags.family as UiFamily[];
+  } else if (flags.all || flags.yes || present.length === 1) {
+    targets = present;
+  } else {
+    const selected = await multiselect({
+      message: `Add ${components.join(', ')} to which UI families?`,
+      options: present.map((f) => ({ value: f, label: `ui-${f}` })),
+      initialValues: present,
+      required: true,
+    });
+    if (isCancel(selected)) bail('Cancelled.');
+    targets = selected as UiFamily[];
+  }
+
+  const pm = await resolvePm(flags.pm, repoRoot);
+  const tasks = planComponentTasks({
+    repoRoot,
+    components,
+    families: targets,
+    packageManager: pm,
+    overwrite: flags.overwrite,
+  });
+
+  const succeeded: UiFamily[] = [];
+  const failed: UiFamily[] = [];
+  for (const task of tasks) {
+    if (flags.dryRun) {
+      log.info(`[dry-run] ${task.uiPackage}: ${task.command} ${task.args.join(' ')}`);
+      succeeded.push(task.family);
+      continue;
+    }
+    log.step(`${task.uiPackage} ← ${components.join(', ')}`);
+    try {
+      await nodeCommandRunner.run(task.command, task.args, { cwd: repoRoot });
+      succeeded.push(task.family);
+    } catch (err) {
+      log.warn(`${task.uiPackage}: ${err instanceof Error ? err.message : String(err)}`);
+      failed.push(task.family);
+    }
+  }
+
+  if (flags.dryRun) {
+    outro(`${pc.dim('dry-run')} — ${tasks.length} task(s) planned.`);
+    return;
+  }
+  if (succeeded.length === 0) bail('No components were added.');
+  const note = failed.length > 0 ? ` (skipped: ${failed.join(', ')})` : '';
+  outro(`Added ${components.join(', ')} to ${succeeded.join(', ')}${note}.`);
+}
+
 const program = new Command();
 program.name('solvrae').description('Operate on an existing Solvrae monorepo');
 
@@ -142,6 +222,22 @@ add
   .option('--dry-run', 'print the plan without writing anything', false)
   .option('--offline', 'use baseline versions instead of querying the registry', false)
   .action((id: string, flags: AddTemplateFlags) => runAddTemplate(id, flags));
+
+add
+  .command('component <names...>')
+  .description('Add shadcn components to the matching UI packages (one invocation per family)')
+  .option(
+    '--family <family>',
+    'target a UI family (repeatable: react|vue|svelte)',
+    collectFamily,
+    [],
+  )
+  .option('--all', 'add to every UI family present', false)
+  .option('--overwrite', 'overwrite existing files', false)
+  .option('--pm <pm>', 'package manager (pnpm|npm|yarn|bun)')
+  .option('-y, --yes', 'no prompts; target all families present', false)
+  .option('--dry-run', 'print the commands without running them', false)
+  .action((names: string[], flags: AddComponentFlags) => runAddComponent(names, flags));
 
 program
   .command('list')
