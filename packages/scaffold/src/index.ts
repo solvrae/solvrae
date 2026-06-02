@@ -15,6 +15,12 @@ export {
   planComponentTasks,
 } from './add-component';
 export {
+  type DoctorReport,
+  type DiagnoseInput,
+  collectDiagnostics,
+  runDoctorChecks,
+} from './doctor';
+export {
   inferScope,
   hasUiPackage,
   hasThemePackage,

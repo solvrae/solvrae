@@ -2,6 +2,8 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cancel, intro, isCancel, log, multiselect, outro } from '@clack/prompts';
 import {
+  type Action,
+  type Diagnostic,
   type PackageManager,
   type UiFamily,
   createConsoleLogger,
@@ -20,6 +22,7 @@ import {
   planAddTemplate,
   planComponentTasks,
   presentUiFamilies,
+  runDoctorChecks,
 } from '@solvrae/scaffold';
 import { Command } from 'commander';
 import pc from 'picocolors';
@@ -118,17 +121,55 @@ async function runList(): Promise<void> {
   outro('Use `solvrae add template <id>` to add a framework.');
 }
 
-async function runDoctor(): Promise<void> {
+async function runDoctor(flags: { fix: boolean }): Promise<void> {
   intro(pc.bold(pc.cyan(' solvrae doctor ')));
   const repoRoot = await getRepoRoot();
-  const families = await presentUiFamilies(repoRoot);
-  const hasTheme = await nodeFileSystem.exists(join(repoRoot, 'packages/ui-theme/package.json'));
+  const report = await runDoctorChecks(repoRoot);
 
-  log.info(`Repo root: ${repoRoot}`);
-  if (hasTheme) log.success('Shared theme (ui-theme) present.');
-  else log.warn('Shared theme (ui-theme) missing — run `solvrae add template <id>`.');
-  log.info(`UI families: ${families.length ? families.join(', ') : '(none)'}`);
-  outro('Doctor finished.');
+  log.info(`Apps: ${report.apps.length ? report.apps.join(', ') : '(none)'}`);
+  log.info(`UI families: ${report.families.length ? report.families.join(', ') : '(none)'}`);
+
+  if (report.diagnostics.length === 0) {
+    log.success('No issues found.');
+    outro('Doctor finished.');
+    return;
+  }
+
+  for (const d of report.diagnostics) {
+    if (d.level === 'error') log.error(d.message);
+    else log.warn(d.message);
+  }
+
+  const fixable = report.diagnostics.filter(
+    (d): d is Diagnostic & { fix: Action } => d.fix !== undefined,
+  );
+
+  if (!flags.fix) {
+    log.info(
+      fixable.length > 0
+        ? `${fixable.length} issue(s) auto-fixable — re-run with --fix.`
+        : 'No auto-fixable issues.',
+    );
+    outro('Doctor finished.');
+    return;
+  }
+
+  if (fixable.length === 0) {
+    outro('Nothing to fix automatically.');
+    return;
+  }
+
+  const logger = createConsoleLogger('info');
+  try {
+    await executePlan(
+      { summary: 'doctor --fix', actions: fixable.map((d) => d.fix) },
+      createExecutorDeps(logger),
+      { cwd: repoRoot, dryRun: false },
+    );
+  } catch (err) {
+    bail(err instanceof Error ? err.message : String(err));
+  }
+  outro(`Fixed ${fixable.length} issue(s).`);
 }
 
 interface AddComponentFlags {
@@ -246,8 +287,9 @@ program
 
 program
   .command('doctor')
-  .description('Report basic repo health')
-  .action(() => runDoctor());
+  .description('Report repo health and optionally repair wiring drift')
+  .option('--fix', 'apply auto-fixes for detected issues', false)
+  .action((flags: { fix: boolean }) => runDoctor(flags));
 
 program.parseAsync().catch((err) => {
   console.error(err);
