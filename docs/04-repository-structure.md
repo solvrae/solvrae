@@ -4,80 +4,72 @@ Solvrae is a pnpm + Turborepo monorepo — we dogfood the stack we generate. Cor
 adapters, and entry points are independent packages so adapters can be versioned
 and released on their own cadence.
 
+File contents are **generated programmatically** (template strings → `Action[]`),
+not copied from raw `templates/` directories — so every package is plain, bundled,
+type-checked TypeScript.
+
 ```
 solvrae/
-├─ apps/
-│  └─ docs/                        # Documentation site (Astro Starlight) — optional
-│
 ├─ packages/
 │  ├─ core/                        # @solvrae/core — the engine (no framework code)
-│  │  ├─ src/
-│  │  │  ├─ context/               # run context: cwd, repo, pm, manifest
-│  │  │  ├─ prompts/               # @clack wrappers + non-interactive fallbacks
-│  │  │  ├─ plan/                  # Action types + planner + executor + rollback
-│  │  │  ├─ fs/                    # writeJson, mergeJson, renderTemplate, editFile
-│  │  │  ├─ pm/                    # package-manager-detector + nypm wrappers
-│  │  │  ├─ registry/              # shadcn registry clients (react/vue/svelte)
-│  │  │  ├─ adapter/               # the FrameworkAdapter contract + resolver
-│  │  │  └─ reporter/              # human + --json output
-│  │  └─ package.json
+│  │  └─ src/                      # flat modules, not folders:
+│  │     ├─ types.ts errors.ts     #   shared types, error hierarchy
+│  │     ├─ pm.ts fs.ts run.ts     #   pm detection, fs + deepMerge, command runner
+│  │     ├─ actions.ts executor.ts #   Action union, Plan, executor (dry-run + rollback)
+│  │     ├─ context.ts reporter.ts #   run context, console/memory logger
+│  │     ├─ adapter.ts             #   FrameworkAdapter contract + AdapterContext
+│  │     ├─ version.ts specs.ts    #   registry version resolver + shared dependency specs
+│  │     ├─ schemas.ts             #   Zod: components.json + registry item
+│  │     └─ testing.ts             #   in-memory fs / recording runner (test helpers)
 │  │
-│  ├─ cli/                         # solvrae — in-repo binary (add/list/doctor/upgrade)
-│  │  ├─ src/
-│  │  │  ├─ bin.ts                 # #!/usr/bin/env node entry
-│  │  │  └─ commands/              # one file per subcommand, all delegate to core
-│  │  └─ package.json              # "bin": { "solvrae": "./dist/bin.js" }
+│  ├─ scaffold/                    # @solvrae/scaffold — orchestration shared by both CLIs
+│  │  └─ src/                      #   adapters registry, planBaseRepo, planInit,
+│  │                               #   planAddTemplate, planComponentTasks, doctor, repo
+│  │
+│  ├─ cli/                         # solvrae — in-repo binary (add template/component, list, doctor)
+│  │  └─ src/bin.ts                #   commander + @clack/prompts → @solvrae/scaffold
 │  │
 │  ├─ create-solvrae/              # create-solvrae — npm create entry
-│  │  ├─ src/bin.ts                # collects bootstrap input → core.init()
-│  │  └─ package.json              # "bin": { "create-solvrae": "./dist/bin.js" }
+│  │  └─ src/bin.ts                #   bootstrap prompts → scaffold.planInit
 │  │
 │  ├─ adapters/
-│  │  ├─ next/                     # @solvrae/adapter-next
-│  │  │  ├─ src/index.ts           # implements FrameworkAdapter
-│  │  │  └─ templates/             # raw template files (co-located, adapter owns them)
-│  │  │     ├─ app/                # apps/<name> scaffold
-│  │  │     └─ wiring/             # snippets/patches for app ↔ ui-react
-│  │  ├─ nuxt/                     # @solvrae/adapter-nuxt          (family: vue)
-│  │  ├─ sveltekit/                # @solvrae/adapter-sveltekit     (family: svelte)
-│  │  └─ tanstack-start/           # @solvrae/adapter-tanstack-start (family: react)
+│  │  ├─ next/                     # @solvrae/adapter-next            (family: react)
+│  │  ├─ vite-react/               # @solvrae/adapter-vite-react      (family: react)
+│  │  ├─ tanstack-start/           # @solvrae/adapter-tanstack-start  (family: react)
+│  │  ├─ nuxt/                     # @solvrae/adapter-nuxt            (family: vue)
+│  │  └─ sveltekit/                # @solvrae/adapter-sveltekit       (family: svelte)
+│  │     └─ src/index.ts           #   each: default export implementing FrameworkAdapter
 │  │
-│  ├─ ui-templates/                # @solvrae/ui-templates — ui package templates
-│  │  └─ templates/
-│  │     ├─ theme/                  # packages/ui-theme scaffold (shared styles.css, default Nova)
-│  │     ├─ react/                 # packages/ui-react scaffold (components.json, cn) — component-only
-│  │     ├─ vue/                   # packages/ui-vue   — component-only
-│  │     └─ svelte/                # packages/ui-svelte — component-only
+│  ├─ ui-templates/                # @solvrae/ui-templates — UI package generators
+│  │  └─ src/                      #   theme.ts (shared ui-theme), react.ts / vue.ts /
+│  │                               #   svelte.ts (component-only packages), families.ts
 │  │
-│  └─ config/                      # @solvrae/config — shared tsconfig + biome presets
-│
-├─ e2e/                            # end-to-end: scaffold into tmp, install, build, assert
-│  ├─ next.e2e.ts
-│  ├─ nuxt.e2e.ts
-│  └─ add-template.e2e.ts
+│  └─ config/                      # @solvrae/config — shared tsconfig presets
 │
 ├─ .changeset/                     # changesets release flow
-├─ .github/workflows/              # CI: lint, unit, e2e matrix (pm × adapter)
-├─ turbo.json
-├─ pnpm-workspace.yaml
-├─ biome.json
-├─ tsconfig.base.json
-└─ package.json
+├─ .github/workflows/ci.yml        # CI: lint · typecheck · build · test
+├─ turbo.json  pnpm-workspace.yaml  biome.json  tsconfig.base.json  package.json
 ```
+
+> Planned, not yet present: `apps/docs` (docs site) and an `e2e/` package (the
+> build matrix is currently verified by scaffolding into a temp dir manually; see
+> the roadmap).
 
 ## Why this split
 
 - **`core` has zero framework imports.** It depends only on the adapter
   *contract*. This is what keeps framework churn (a Next 16 change, a Nuxt 4
   change) contained to one adapter package.
-- **Adapters own their templates.** Co-locating `templates/` inside each adapter
-  means a framework maintainer touches exactly one package. No central template
-  dir that everyone fights over.
-- **UI-package templates are separate from adapters** because they are keyed by
-  **UI family**, not framework — `ui-templates/react` is shared by `adapter-next`
-  and `adapter-tanstack-start`.
-- **Two thin bins** (`cli`, `create-solvrae`) keep the published entry points
-  minimal; both call into `core`.
+- **Adapters own their generation logic.** Each adapter is one package whose
+  `planApp` / `planWiring` emit `Action[]`; a framework maintainer touches exactly
+  one package.
+- **UI-package generators are separate from adapters** because they are keyed by
+  **UI family**, not framework — `ui-templates`' `react` generator is shared by
+  `adapter-next`, `adapter-vite-react`, and `adapter-tanstack-start`.
+- **`scaffold` is the orchestrator.** It holds the adapter registry and the
+  `init` / `add-template` / `add-component` / `doctor` planners, so both bins stay
+  thin and never duplicate that logic.
+- **Two thin bins** (`cli`, `create-solvrae`) call into `scaffold`/`core`.
 
 ## Package naming & publishing
 
@@ -86,9 +78,10 @@ solvrae/
 | Bootstrapper | `create-solvrae` | ✅ (`npm create solvrae`) |
 | In-repo CLI | `solvrae` | ✅ |
 | Engine | `@solvrae/core` | ✅ (adapter authors depend on it) |
+| Orchestration | `@solvrae/scaffold` | ✅ |
 | Adapters | `@solvrae/adapter-<id>` | ✅ |
 | UI templates | `@solvrae/ui-templates` | ✅ |
-| Shared config | `@solvrae/config` | internal (or published) |
+| Shared config | `@solvrae/config` | internal |
 
 Independent versioning via Changesets: a fix to `adapter-nuxt` ships without
 bumping `core` or other adapters.

@@ -1,5 +1,12 @@
 # 12 — Design System & Configuration
 
+> **Status: partially implemented.** The shared-theme architecture below is real —
+> generated repos ship one `packages/ui-theme` with a fixed **neutral** token set
+> that every family consumes. The *configurable prompt* (base color, radius, dark
+> mode, icon library, React-only `--base` / `--preset`) is **designed but not yet
+> implemented**; today the theme is the neutral default. shadcn's own prompts never
+> appear regardless. This doc describes the target design.
+
 This document answers a common question: **do shadcn's native CLI prompts (base
 color, style, base primitive, etc.) still appear when using Solvrae?**
 

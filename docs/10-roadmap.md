@@ -3,61 +3,67 @@
 Milestones are intentionally vertical: each ships something a user can run
 end-to-end, with the e2e build matrix green.
 
-## M0 — Foundations
+Legend: ✅ done · 🚧 in progress · ⬜ planned.
 
-- [ ] Create the **`solvrae` GitHub organization** + matching **`solvrae` npm org** (scope `@solvrae/*`)
-- [ ] Monorepo bootstrap (pnpm + Turborepo, Biome, tsup, Vitest, Changesets, CI)
-- [ ] `@solvrae/core`: context, `pm`, `fs`, plan/executor, reporter, adapter contract
-- [ ] Action types + pure planner/executor with rollback + `--dry-run`
-- [ ] Zod schemas for `components.json`, registry, adapter metadata
+## M0 — Foundations ✅
 
-## M1 — First vertical slice (React/Next)
+- [x] Monorepo bootstrap (pnpm + Turborepo, Biome, tsup, Vitest, Changesets, CI)
+- [x] `@solvrae/core`: types, errors, `pm`, `fs`, plan/executor, reporter, adapter contract
+- [x] Action types + pure planner/executor with rollback + `--dry-run`
+- [x] Zod schemas for `components.json` and registry items
+- [ ] Create the **`solvrae` GitHub org** + **`solvrae` npm org** (publish prerequisite)
 
-- [ ] `@solvrae/ui-templates` → `react` (Tailwind v4 + shadcn/ui)
-- [ ] `@solvrae/adapter-next`
-- [ ] `create-solvrae` bootstrapper → `init` flow end-to-end
-- [ ] E2E: `{pnpm,npm,yarn,bun} × next` scaffolds, installs, builds
-- [ ] `solvrae list` + `solvrae doctor`
+## M1 — First vertical slice (React/Next) ✅
 
-## M2 — `add template` + UI-family reuse
+- [x] `@solvrae/ui-templates` → `react` (Tailwind v4 + shadcn/ui) + shared `ui-theme`
+- [x] `@solvrae/adapter-next`
+- [x] `create-solvrae` bootstrapper → `init` flow end-to-end (Next app builds)
+- [x] Registry-backed version resolution + React security floor (`@solvrae/core/specs`)
+- [ ] E2E in CI across all four package managers (verified manually with pnpm so far)
 
-- [ ] `solvrae add template <id>` with idempotent, additive planning
-- [ ] `@solvrae/adapter-tanstack-start` (proves React-family **reuse** of `ui-react`)
-- [ ] E2E: `init next` → `add tanstack-start` reuses `ui-react`
+## M2 — `add template` + UI-family reuse ✅
 
-## M3 — Cross-framework (Vue + Svelte)
+- [x] `@solvrae/scaffold` — shared adapter registry + `planInit` / `planAddTemplate`
+- [x] `solvrae add template <id>` — idempotent, additive, reuse-aware
+- [x] `@solvrae/adapter-vite-react` + `@solvrae/adapter-tanstack-start` (React reuse of `ui-react`)
+- [x] `solvrae list` + `solvrae doctor`
+- [x] E2E: `init next` → `add template tanstack-start` reuses `ui-react`; both build
 
-- [ ] `ui-templates/vue` + `@solvrae/adapter-nuxt` (registry: `shadcn-vue`)
-- [ ] `ui-templates/svelte` + `@solvrae/adapter-sveltekit` (registry: `shadcn-svelte`)
-- [ ] E2E: polyglot repo (`next` + `nuxt` + `sveltekit`) builds
+## M3 — Cross-framework (Vue + Svelte) ✅
 
-## M4 — Robustness & DX
+- [x] `ui-templates` vue + svelte families; `@solvrae/adapter-nuxt` + `@solvrae/adapter-sveltekit`
+- [x] E2E: polyglot repo (`next` + `nuxt` + `sveltekit`) builds with one shared `ui-theme`
 
-- [ ] `solvrae doctor --fix` for drifted wiring
+## M4 — Robustness & DX 🚧
+
+- [x] `solvrae add component <name...>` — hybrid family resolution (auto-detect / multiselect / `--family` / `--all`); see [11 — Component Management](11-component-management.md)
+- [x] `solvrae doctor --fix` for drifted wiring
+- [x] Dev DX: Turborepo TUI, fixed dev ports, Nuxt telemetry off, uniform explicit-path component imports
 - [ ] `solvrae upgrade` with diff preview + migrations
-- [ ] `solvrae add component <name...>` — hybrid family resolution (auto-detect + multiselect + `--family`/`--all`); see [11 — Component Management](11-component-management.md)
 - [ ] Third-party adapter discovery (`solvrae-adapter-*` convention)
 - [ ] Docs site (Astro Starlight) under `apps/docs`
 
-## M5 — Ecosystem
+## M5 — Ecosystem ⬜
 
 - [ ] More adapters: `react-router`, `vite-vue`, `vite-svelte`, `solid-start`, `astro`
+- [ ] Registry-first `add component` (offline-capable, replacing CLI delegation)
 - [ ] Nightly CI against upstream `latest` (early-warning for shadcn/Tailwind/frameworks)
 - [ ] Adapter generator (`gen:adapter`) + adapter authoring guide
-- [ ] Telemetry (opt-in) to learn which templates matter most
+- [ ] Publish to npm
 
-## Supported templates (target)
+## Supported templates
 
 | Template | UI family | shadcn registry | Status |
 |----------|-----------|-----------------|--------|
-| `next` | react | `shadcn/ui` | planned (M1) |
-| `tanstack-start` | react | `shadcn/ui` | planned (M2) |
-| `nuxt` | vue | `shadcn-vue` | planned (M3) |
-| `sveltekit` | svelte | `shadcn-svelte` | planned (M3) |
-| `react-router` | react | `shadcn/ui` | M5 |
-| `vite-vue` | vue | `shadcn-vue` | M5 |
-| `vite-svelte` | svelte | `shadcn-svelte` | M5 |
-| `solid-start` | solid | `shadcn-svelte` | M5 |
+| `next` | react | `shadcn/ui` | ✅ available |
+| `vite-react` | react | `shadcn/ui` | ✅ available |
+| `tanstack-start` | react | `shadcn/ui` | ✅ available |
+| `nuxt` | vue | `shadcn-vue` | ✅ available |
+| `sveltekit` | svelte | `shadcn-svelte` | ✅ available |
+| `react-router` | react | `shadcn/ui` | ⬜ M5 |
+| `vite-vue` | vue | `shadcn-vue` | ⬜ M5 |
+| `vite-svelte` | svelte | `shadcn-svelte` | ⬜ M5 |
+| `solid-start` | solid | `shadcn-svelte` | ⬜ M5 |
 | `astro` | react/vue/svelte | varies | exploratory |
 
 ## Explicitly out of scope (for now)

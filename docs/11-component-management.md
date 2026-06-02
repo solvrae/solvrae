@@ -86,21 +86,30 @@ Component adding is the **one place we relax that**, because shadcn's dependency
 resolution (`registryDependencies`, npm deps, CSS tokens) is exactly what shadcn
 maintains best and is costly to re-implement per family.
 
-Strategy, in priority order:
+**Shipped today:** Solvrae delegates to each family's official CLI. For every
+target family it runs one non-interactive invocation —
+`<pm> dlx <cli> add <names> --cwd packages/ui-<family> --yes` — where `<cli>` is
+`shadcn` / `shadcn-vue` / `shadcn-svelte`. Solvrae owns the uniform UX (family
+detection, multiselect, partial-availability tolerance); the upstream CLI owns the
+fetch + resolution. `--dry-run` prints the commands.
 
-1. **Registry-first.** Fetch the official registry JSON for the family (validated
-   with Zod), resolve `registryDependencies` and npm deps, and write files into the
-   UI package ourselves. This keeps behavior deterministic and `--dry-run`-able.
-2. **CLI fallback.** Where registry-first is impractical for a family, invoke that
-   family's official CLI **non-interactively** with pinned flags and `--cwd` set to
-   the UI package.
+For this to work, generated UI packages carry:
 
-Either path still produces a Plan (`Action[]`) so `--dry-run`, idempotency, and
-reporting work uniformly across families.
+- **tsconfig `baseUrl` + `paths`** (`@scope/ui-<family>/* → ./src/*`) so the CLIs
+  resolve component aliases into the package;
+- **component directories** (`<name>/index`) for Vue/Svelte (React uses single
+  files), matching each CLI's layout so imports are uniform
+  (`@scope/ui-<family>/components/<name>`);
+- for **`ui-svelte`**, `svelte` + `tailwindcss` devDependencies — shadcn-svelte's
+  CLI requires both to be resolvable from the package.
 
-## `solvrae doctor` integration
+**Planned:** a registry-first path (fetch the registry JSON, validated with Zod,
+and write files ourselves) to make `add component` offline-capable and fully
+`--dry-run`-able without shelling out.
 
-`doctor` reports component-level drift too: a component present in `ui-react` but
-missing from `ui-vue` when both families exist can be surfaced (and, with
-`--fix`, offered as an `add component --family vue` action) so polyglot repos stay
-in sync intentionally rather than by accident.
+## `solvrae doctor` integration (planned)
+
+A future check can surface component-level drift — a component present in
+`ui-react` but missing from `ui-vue` when both families exist — and offer an
+`add component --family vue` fix. (Today `doctor` checks repo-level wiring; see
+[06 — CLI Reference](06-cli-reference.md).)

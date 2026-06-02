@@ -3,18 +3,18 @@
 Two binaries: `create-solvrae` (bootstrap a new repo) and `solvrae` (operate on an
 existing solvrae repo). Both share global flags and the same engine.
 
-## Global flags
+## Common flags
 
 | Flag | Description |
 |------|-------------|
 | `--pm <pnpm\|npm\|yarn\|bun>` | Force a package manager (otherwise auto-detected) |
-| `--ts` / `--js` | Language; **TypeScript is the default** |
-| `--yes`, `-y` | Accept all defaults, skip prompts (CI mode) |
-| `--dry-run` | Print the Plan; write nothing |
-| `--json` | Machine-readable output |
+| `-y`, `--yes` | Accept defaults, skip prompts (CI mode) |
+| `--dry-run` | Print the plan; write nothing |
 | `--no-install` | Skip dependency installation |
-| `--cwd <path>` | Run as if in `<path>` |
-| `--verbose` | Debug logging |
+| `--offline` | Use pinned baseline versions instead of querying the npm registry |
+
+> TypeScript is always the default (and currently the only) language. Planned:
+> `--json` machine output and `--cwd`.
 
 ---
 
@@ -37,44 +37,28 @@ create-solvrae [directory] [options]
 | Argument / option | Description |
 |-------------------|-------------|
 | `[directory]` | Target directory (prompted if omitted) |
-| `-t, --template <id>` | `next` \| `nuxt` \| `sveltekit` \| `tanstack-start` \| … |
+| `-t, --template <id>` | `next` \| `vite-react` \| `tanstack-start` \| `nuxt` \| `sveltekit` |
 | `--scope <scope>` | Internal package scope, default `@repo` |
-| `--base-color <c>` | `neutral` (default) \| `zinc` \| `stone` \| `slate` \| `gray` |
-| `--radius <r>` | Border radius token, default `0.5rem` |
-| `--dark` / `--no-dark` | Dark mode (default: on) |
-| `--icon <lib>` | Icon library, default `lucide` |
-| `--base <radix\|base>` | React-only: shadcn base primitive (Radix or Base UI) |
-| `--preset <code>` | React-only: shadcn design-system preset code |
-| `--git` / `--no-git` | Initialize a git repo (default: yes) |
+| `--pm <pm>` · `--no-install` · `-y` · `--dry-run` · `--offline` | see [common flags](#common-flags) |
 
 ### Interactive flow
 
 ```
-◆  Project name?  ……………………  my-app
-◆  Which framework template?
-   › Next.js   (React)
-     Nuxt      (Vue)
-     SvelteKit (Svelte)
-     TanStack Start (React)
-◆  Language?  › TypeScript (recommended) / JavaScript
+◆  Project directory?  …………………  my-app
+◆  Framework template?  › next / vite-react / tanstack-start / nuxt / sveltekit
 ◆  Package manager?  › pnpm (detected) / npm / yarn / bun
-◆  Internal package scope?  ……  @repo
-─ Design system (asked once, written to every UI package) ──
-◆  Base color?       › Neutral (default) / Zinc / Stone / Slate / Gray
-◆  Border radius?    › 0.5rem (default) / …
-◆  Dark mode?        › Yes / No
-◆  Icon library?     › Lucide (default) / Radix Icons
-◇  Plan: create base repo · apps/web (next) · packages/ui-react · wire · install
+◇  Plan: scaffold next app "web" in my-app  (base · ui-theme · ui-react · app · wire · install)
 ●  Done. Next: cd my-app && pnpm dev
 ```
 
-> shadcn's **own** interactive prompts do **not** appear — Solvrae asks a unified,
-> family-neutral set once and writes them into each `components.json`. See
-> [12 — Design System & Configuration](12-design-system-config.md). React-only
-> options (`--base`, `--preset`) apply to the React family only.
+Internally this calls `scaffold.planInit({...})`, which composes the base repo →
+shared `ui-theme` → `ui-<family>` package → app → wiring → install.
 
-This maps internally to `core.init({...})`, which runs the base scaffold + a
-single `add template` for the chosen framework.
+> **Planned — design-system configuration.** A unified prompt (base color, radius,
+> dark mode, icon library; React-only `--base` / `--preset`) is designed in
+> [12 — Design System & Configuration](12-design-system-config.md) but **not yet
+> implemented** — generated repos currently ship a fixed neutral theme. shadcn's
+> own prompts never appear regardless (Solvrae writes `components.json` itself).
 
 ---
 
@@ -94,15 +78,17 @@ solvrae add template tanstack-start --name dashboard
 
 | Option | Description |
 |--------|-------------|
-| `--name <name>` | App directory name (default derived from template, deduped) |
-| `--reuse-ui` / `--fresh-ui` | Force reuse / force a new UI package for the family |
+| `--name <name>` | App directory name (defaults to the template id) |
+| `--scope <scope>` | Internal scope (inferred from the repo's `ui-theme` when omitted) |
+| `--pm <pm>` · `--no-install` · `--dry-run` · `--offline` | see [common flags](#common-flags) |
 
 Behavior:
 
 - New family → scaffolds `apps/<name>` **and** `packages/ui-<family>`, wires both.
 - Existing family → scaffolds only `apps/<name>`, wires it to the existing
-  `packages/ui-<family>`.
-- Idempotent: re-running with an existing app name is a no-op (or `--force`).
+  `packages/ui-<family>` (the shared `ui-theme` is reused, never duplicated).
+- Idempotent: targeting an app directory that already exists is a hard error
+  (`PreconditionError`) — pass a different `--name`.
 
 ### `solvrae add component <name...>`
 
@@ -120,8 +106,12 @@ solvrae add component button --all            # all families, no prompt
 | Option | Description |
 |--------|-------------|
 | `--family <react\|vue\|svelte>` | Target a single UI family (repeatable). Overrides auto-detect |
-| `--all` | Add to every family that has the component, skip the prompt |
+| `--all` | Add to every present family, skip the prompt |
 | `--overwrite` | Overwrite if the component already exists |
+| `-y` · `--pm <pm>` · `--dry-run` | see [common flags](#common-flags) |
+
+Each target family is handled by one non-interactive call to its official shadcn
+CLI (`shadcn` / `shadcn-vue` / `shadcn-svelte`) pointed at `packages/ui-<family>`.
 
 Default behavior:
 
@@ -136,21 +126,23 @@ Per-family availability is reported explicitly (e.g. a component missing from th
 
 ### `solvrae list`
 
-Show templates installed in this repo and which UI family each maps to, plus
-available templates not yet added.
+Print the repo's apps, the UI families present, and the available templates.
 
-### `solvrae doctor`
+### `solvrae doctor` / `solvrae doctor --fix`
 
-Diagnose a repo: detect missing wiring (e.g. a UI package not in an app's Tailwind
-sources, a missing `transpilePackages` entry, drifted `components.json`) and
-optionally `--fix` them. This is the safety net for repos edited by hand or
-upgraded.
+Diagnose the repo and, with `--fix`, repair it. Current checks:
 
-### `solvrae upgrade`
+- the shared `packages/ui-theme` exists;
+- each `ui-<family>/components.json` points `tailwind.css` at the shared theme;
+- every app consuming a `ui-<family>` package also depends on `@scope/ui-theme`.
 
-Re-run the wiring for the current adapter/shadcn/Tailwind versions — used when a
-new adapter release adjusts conventions (e.g. Tailwind v4 → v5). Shows a diff and
-asks before applying.
+Each issue carries a fix Action; `--fix` applies them through the executor (with
+the same rollback guarantees as any plan). The safety net for hand-edited repos.
+
+### `solvrae upgrade` — planned
+
+Re-pin/re-wire to the current adapter/shadcn/Tailwind versions with a diff preview.
+Not yet implemented.
 
 ---
 
@@ -159,16 +151,13 @@ asks before applying.
 | Code | Meaning |
 |------|---------|
 | `0` | Success |
-| `1` | Generic error |
-| `2` | Invalid usage / bad flags |
-| `3` | Precondition failed (e.g. `add` outside a solvrae repo) |
-| `130` | Cancelled by user (Ctrl-C) |
+| `1` | Error (bad usage, precondition failed, execution failed, cancelled) |
 
 ## Non-interactive / CI
 
-All prompts have flag equivalents. With `--yes`, missing values fall back to
-documented defaults. `--json` emits the Plan and result for scripting:
+With `-y`/`--yes`, prompts fall back to documented defaults; pass `--pm` and
+`--offline` for fully deterministic, network-free runs:
 
 ```bash
-npx create-solvrae my-app -t next --yes --pm pnpm --json
+npx create-solvrae my-app -t next --yes --pm pnpm --offline
 ```

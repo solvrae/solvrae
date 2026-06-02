@@ -9,15 +9,24 @@ keeps working when you add a *second* (or third) framework to the same repo
 later on.
 
 ```bash
-# Scaffold a new monorepo
+# Scaffold a new monorepo (interactive, or pass a template)
+npx create-solvrae@latest
 npx create-solvrae@latest my-app -t next
 
-# …or interactively
-npx create-solvrae@latest
+# Inside a Solvrae repo — add another framework any time later
+npx solvrae add template nuxt           # reuses an existing ui-<family> when possible
 
-# Add another framework to an existing solvrae repo, any time later
-npx solvrae add template nuxt
+# Add shadcn components across every UI family at once
+npx solvrae add component button card --all
+
+# Inspect / repair the repo
+npx solvrae list
+npx solvrae doctor --fix
 ```
+
+Supported templates: **`next`**, **`nuxt`**, **`sveltekit`**, **`tanstack-start`**,
+**`vite-react`** — React, Vue, and Svelte apps that all share **one** design-system
+package (`ui-theme`).
 
 No more hand-wiring `components.json`, Tailwind content globs, `transpilePackages`,
 workspace `tsconfig` path aliases, and per-framework shadcn registries every time
@@ -56,7 +65,12 @@ Solvrae closes that gap with a single, programmatic, type-safe engine.
 5. **`add template`** repeats steps 2–4 for a new framework, **reusing** an
    existing UI package when the new app shares a UI family (e.g. `next` and
    `tanstack-start` both reuse `ui-react`).
+6. **`add component`** installs shadcn components into the matching UI package(s),
+   delegating to each family's official CLI with a single, uniform command.
+7. **`doctor` / `doctor --fix`** detects and repairs wiring drift.
 
+Dependency versions are resolved from the npm registry at scaffold time and pinned
+(bounded by each adapter's verified range, with a security floor on React).
 Everything is **package-manager agnostic** (pnpm, npm, yarn, bun) and TypeScript
 strict by default.
 
@@ -72,16 +86,27 @@ strict by default.
 | [06 — CLI Reference](docs/06-cli-reference.md) | Every command, flag, and prompt |
 | [07 — Framework Adapters](docs/07-framework-adapters.md) | The adapter contract — how to add a framework |
 | [08 — Compatibility & Maintainability](docs/08-compatibility-and-maintainability.md) | Staying compatible as shadcn & Turborepo evolve |
-| [09 — Contributing](docs/09-contributing.md) | Dev setup, conventions, PR & release flow |
+| [09 — Contributing](docs/09-contributing.md) | Conventions & release flow (see also [CONTRIBUTING.md](CONTRIBUTING.md)) |
 | [10 — Roadmap](docs/10-roadmap.md) | Milestones and supported frameworks |
 | [11 — Component Management](docs/11-component-management.md) | Adding shadcn components across UI families |
 | [12 — Design System & Configuration](docs/12-design-system-config.md) | Base color/radius/preset prompts — and why shadcn's native prompts don't appear |
 
 ## Status
 
-🚧 **Pre-alpha / design phase.** This repository currently contains the design
-documentation. Implementation tracks the milestones in the
-[roadmap](docs/10-roadmap.md).
+🚧 **Pre-alpha (not yet published to npm).** The engine is implemented and verified
+end-to-end: scaffolding all templates, `add template` with UI-family reuse,
+`add component` across React/Vue/Svelte, and `doctor --fix` — a polyglot
+`next` + `nuxt` + `sveltekit` repo builds with one shared `ui-theme`. See the
+[roadmap](docs/10-roadmap.md) for what's done and what's next.
+
+While unpublished, run it from a local build (`pnpm build`) — see
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Contributing
+
+Contributions — especially **new framework adapters** — are welcome. The core never
+needs to change to add a framework. See [CONTRIBUTING.md](CONTRIBUTING.md) for dev
+setup, the adapter contract, and the PR/release flow.
 
 ## License
 
