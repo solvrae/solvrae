@@ -8,6 +8,7 @@ import {
   type WiringOptions,
   addDependency,
   resolveAll,
+  specs,
   writeFile,
 } from '@solvrae/core';
 
@@ -21,18 +22,20 @@ function json(value: unknown): string {
 
 /** Runtime deps, with the range we support and a known-good offline baseline. */
 const RUNTIME_DEPS: Record<string, DependencySpec> = {
+  // Next 16.x is the latest patched line (CVE-2025-66478 App Router RCE was fixed
+  // in 16.x); the resolver picks the latest within range.
   next: { range: '>=16 <17', baseline: '16.2.7' },
-  react: { range: '^19', baseline: '19.2.7' },
-  'react-dom': { range: '^19', baseline: '19.2.7' },
+  react: specs.REACT,
+  'react-dom': specs.REACT_DOM,
 };
 
 const DEV_DEPS: Record<string, DependencySpec> = {
-  '@tailwindcss/postcss': { range: '^4', baseline: '4.0.0' },
-  '@types/node': { range: '^22', baseline: '22.10.0' },
-  '@types/react': { range: '^19', baseline: '19.2.0' },
-  '@types/react-dom': { range: '^19', baseline: '19.2.0' },
-  tailwindcss: { range: '^4', baseline: '4.0.0' },
-  typescript: { range: '^5.7', baseline: '5.7.2' },
+  '@tailwindcss/postcss': specs.TAILWIND_POSTCSS,
+  '@types/node': specs.TYPES_NODE,
+  '@types/react': specs.TYPES_REACT,
+  '@types/react-dom': specs.TYPES_REACT_DOM,
+  tailwindcss: specs.TAILWINDCSS,
+  typescript: specs.TYPESCRIPT,
 };
 
 async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]> {

@@ -8,6 +8,7 @@ import {
   type WiringOptions,
   addDependency,
   resolveAll,
+  specs,
   writeFile,
 } from '@solvrae/core';
 
@@ -20,18 +21,18 @@ function json(value: unknown): string {
 }
 
 const RUNTIME_DEPS: Record<string, DependencySpec> = {
-  react: { range: '^19', baseline: '19.2.7' },
-  'react-dom': { range: '^19', baseline: '19.2.7' },
+  react: specs.REACT,
+  'react-dom': specs.REACT_DOM,
 };
 
 const DEV_DEPS: Record<string, DependencySpec> = {
-  '@tailwindcss/vite': { range: '^4', baseline: '4.0.0' },
-  '@types/react': { range: '^19', baseline: '19.2.0' },
-  '@types/react-dom': { range: '^19', baseline: '19.2.0' },
-  '@vitejs/plugin-react': { range: '^6', baseline: '6.0.2' },
-  tailwindcss: { range: '^4', baseline: '4.0.0' },
-  typescript: { range: '^5.7', baseline: '5.7.2' },
-  vite: { range: '^8', baseline: '8.0.16' },
+  '@tailwindcss/vite': specs.TAILWIND_VITE,
+  '@types/react': specs.TYPES_REACT,
+  '@types/react-dom': specs.TYPES_REACT_DOM,
+  '@vitejs/plugin-react': specs.VITE_PLUGIN_REACT,
+  tailwindcss: specs.TAILWINDCSS,
+  typescript: specs.TYPESCRIPT,
+  vite: specs.VITE,
 };
 
 async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]> {

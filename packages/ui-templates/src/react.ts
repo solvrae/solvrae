@@ -74,8 +74,8 @@ export function planReactUiPackage(opts: UiTemplateOptions): Action[] {
           'tailwind-merge': '^2.5.5',
         },
         peerDependencies: {
-          react: '>=18',
-          'react-dom': '>=18',
+          react: '^19.2.4',
+          'react-dom': '^19.2.4',
         },
         devDependencies: {
           [`${scope}/typescript-config`]: 'workspace:*',

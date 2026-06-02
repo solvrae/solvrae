@@ -56,6 +56,8 @@ export {
   resolveAll,
 } from './version';
 
+export * as specs from './specs';
+
 export * from './adapter';
 
 export {
