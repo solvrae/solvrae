@@ -1,6 +1,8 @@
 import { type Action, SolvraeError, type UiFamily } from '@solvrae/core';
 import { planReactUiPackage } from './react';
 import type { UiTemplateOptions } from './shared';
+import { planSvelteUiPackage } from './svelte';
+import { planVueUiPackage } from './vue';
 
 export { planThemePackage } from './theme';
 export { FAMILIES, uiPackageName, type FamilyInfo } from './families';
@@ -12,11 +14,13 @@ export function planUiPackage(family: UiFamily, opts: UiTemplateOptions): Action
     case 'react':
       return planReactUiPackage(opts);
     case 'vue':
+      return planVueUiPackage(opts);
     case 'svelte':
+      return planSvelteUiPackage(opts);
     case 'solid':
       throw new SolvraeError(
         'NOT_IMPLEMENTED',
-        `UI family "${family}" is not supported yet (planned for M3).`,
+        `UI family "${family}" is not supported yet (Solid is planned for a later release).`,
       );
   }
 }

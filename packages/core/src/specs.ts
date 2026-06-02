@@ -22,3 +22,5 @@ export const TAILWIND_POSTCSS: DependencySpec = { range: '^4', baseline: '4.3.0'
 export const TAILWIND_VITE: DependencySpec = { range: '^4', baseline: '4.3.0' };
 export const VITE: DependencySpec = { range: '^8', baseline: '8.0.16' };
 export const VITE_PLUGIN_REACT: DependencySpec = { range: '^6', baseline: '6.0.2' };
+export const VUE: DependencySpec = { range: '^3.5', baseline: '3.5.35' };
+export const SVELTE: DependencySpec = { range: '^5', baseline: '5.56.1' };

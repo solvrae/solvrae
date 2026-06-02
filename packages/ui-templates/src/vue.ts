@@ -9,8 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 `;
 
-const BUTTON_TSX = `import { type VariantProps, cva } from 'class-variance-authority';
-import type * as React from 'react';
+const BUTTON_VUE = `<script setup lang="ts">
+import { type VariantProps, cva } from 'class-variance-authority';
+import { computed } from 'vue';
 import { cn } from '../lib/utils';
 
 const buttonVariants = cva(
@@ -35,63 +36,64 @@ const buttonVariants = cva(
   },
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+type ButtonVariants = VariantProps<typeof buttonVariants>;
 
-export function Button({ className, variant, size, ...props }: ButtonProps) {
-  return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />;
-}
+const props = defineProps<{
+  variant?: ButtonVariants['variant'];
+  size?: ButtonVariants['size'];
+  class?: string;
+}>();
 
-export { buttonVariants };
+const classes = computed(() =>
+  cn(buttonVariants({ variant: props.variant, size: props.size }), props.class),
+);
+</script>
+
+<template>
+  <button :class="classes">
+    <slot />
+  </button>
+</template>
 `;
 
-/**
- * Scaffold `packages/ui-react` — a component-only shadcn/ui package. Tokens come
- * from the shared `@scope/ui-theme`; this package ships the `cn` util and a
- * starter Button so the slice is demonstrable end-to-end.
- */
-export function planReactUiPackage(opts: UiTemplateOptions): Action[] {
+/** Scaffold \`packages/ui-vue\` — a component-only shadcn-vue package (shared theme). */
+export function planVueUiPackage(opts: UiTemplateOptions): Action[] {
   const { repoRoot, scope } = opts;
   return [
     file(
       repoRoot,
-      'packages/ui-react/package.json',
+      'packages/ui-vue/package.json',
       json({
-        name: `${scope}/ui-react`,
+        name: `${scope}/ui-vue`,
         version: '0.0.0',
         private: true,
         type: 'module',
         exports: {
-          './components/*': './src/components/*.tsx',
+          './components/*': './src/components/*.vue',
           './lib/*': './src/lib/*.ts',
         },
         dependencies: {
           [`${scope}/ui-theme`]: 'workspace:*',
           'class-variance-authority': '^0.7.1',
           clsx: '^2.1.1',
-          'lucide-react': '^0.468.0',
           'tailwind-merge': '^3.6.0',
         },
         peerDependencies: {
-          react: '^19.2.4',
-          'react-dom': '^19.2.4',
+          vue: '^3.5',
         },
         devDependencies: {
           [`${scope}/typescript-config`]: 'workspace:*',
-          '@types/react': '^19.0.0',
           typescript: '^5.7.2',
         },
       }),
     ),
     file(
       repoRoot,
-      'packages/ui-react/components.json',
+      'packages/ui-vue/components.json',
       json({
-        $schema: 'https://ui.shadcn.com/schema.json',
+        $schema: 'https://shadcn-vue.com/schema.json',
         style: 'new-york',
-        rsc: false,
-        tsx: true,
+        typescript: true,
         tailwind: {
           config: '',
           css: '../ui-theme/src/styles.css',
@@ -99,23 +101,23 @@ export function planReactUiPackage(opts: UiTemplateOptions): Action[] {
           cssVariables: true,
         },
         aliases: {
-          components: `${scope}/ui-react/components`,
-          utils: `${scope}/ui-react/lib/utils`,
-          ui: `${scope}/ui-react/components`,
-          lib: `${scope}/ui-react/lib`,
+          components: `${scope}/ui-vue/components`,
+          utils: `${scope}/ui-vue/lib/utils`,
+          ui: `${scope}/ui-vue/components`,
+          lib: `${scope}/ui-vue/lib`,
         },
         iconLibrary: 'lucide',
       }),
     ),
-    file(repoRoot, 'packages/ui-react/src/lib/utils.ts', UTILS_TS),
-    file(repoRoot, 'packages/ui-react/src/components/button.tsx', BUTTON_TSX),
+    file(repoRoot, 'packages/ui-vue/src/lib/utils.ts', UTILS_TS),
+    file(repoRoot, 'packages/ui-vue/src/components/button.vue', BUTTON_VUE),
     file(
       repoRoot,
-      'packages/ui-react/tsconfig.json',
+      'packages/ui-vue/tsconfig.json',
       json({
-        extends: `${scope}/typescript-config/react-library.json`,
+        extends: `${scope}/typescript-config/base.json`,
         include: ['src'],
-        exclude: ['node_modules', 'dist'],
+        exclude: ['node_modules'],
       }),
     ),
   ];

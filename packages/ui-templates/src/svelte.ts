@@ -9,8 +9,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 `;
 
-const BUTTON_TSX = `import { type VariantProps, cva } from 'class-variance-authority';
-import type * as React from 'react';
+const INDEX_TS = `export { default as Button } from './components/button.svelte';
+export { cn } from './lib/utils';
+`;
+
+const BUTTON_SVELTE = `<script lang="ts">
+import { type VariantProps, cva } from 'class-variance-authority';
+import type { HTMLButtonAttributes } from 'svelte/elements';
 import { cn } from '../lib/utils';
 
 const buttonVariants = cva(
@@ -35,87 +40,89 @@ const buttonVariants = cva(
   },
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+type Props = HTMLButtonAttributes & {
+  variant?: VariantProps<typeof buttonVariants>['variant'];
+  size?: VariantProps<typeof buttonVariants>['size'];
+};
 
-export function Button({ className, variant, size, ...props }: ButtonProps) {
-  return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />;
-}
+let {
+  variant = 'default',
+  size = 'default',
+  class: className,
+  children,
+  ...restProps
+}: Props = $props();
+</script>
 
-export { buttonVariants };
+<button class={cn(buttonVariants({ variant, size }), className)} {...restProps}>
+  {@render children?.()}
+</button>
 `;
 
-/**
- * Scaffold `packages/ui-react` — a component-only shadcn/ui package. Tokens come
- * from the shared `@scope/ui-theme`; this package ships the `cn` util and a
- * starter Button so the slice is demonstrable end-to-end.
- */
-export function planReactUiPackage(opts: UiTemplateOptions): Action[] {
+/** Scaffold \`packages/ui-svelte\` — a component-only shadcn-svelte package (shared theme). */
+export function planSvelteUiPackage(opts: UiTemplateOptions): Action[] {
   const { repoRoot, scope } = opts;
   return [
     file(
       repoRoot,
-      'packages/ui-react/package.json',
+      'packages/ui-svelte/package.json',
       json({
-        name: `${scope}/ui-react`,
+        name: `${scope}/ui-svelte`,
         version: '0.0.0',
         private: true,
         type: 'module',
+        // The `svelte` export condition tells vite-plugin-svelte to compile this
+        // package's raw .svelte sources instead of externalizing them.
+        svelte: './src/index.ts',
         exports: {
-          './components/*': './src/components/*.tsx',
+          '.': { svelte: './src/index.ts', types: './src/index.ts' },
+          './components/*': './src/components/*.svelte',
           './lib/*': './src/lib/*.ts',
         },
         dependencies: {
           [`${scope}/ui-theme`]: 'workspace:*',
           'class-variance-authority': '^0.7.1',
           clsx: '^2.1.1',
-          'lucide-react': '^0.468.0',
           'tailwind-merge': '^3.6.0',
         },
         peerDependencies: {
-          react: '^19.2.4',
-          'react-dom': '^19.2.4',
+          svelte: '^5',
         },
         devDependencies: {
           [`${scope}/typescript-config`]: 'workspace:*',
-          '@types/react': '^19.0.0',
           typescript: '^5.7.2',
         },
       }),
     ),
     file(
       repoRoot,
-      'packages/ui-react/components.json',
+      'packages/ui-svelte/components.json',
       json({
-        $schema: 'https://ui.shadcn.com/schema.json',
-        style: 'new-york',
-        rsc: false,
-        tsx: true,
+        $schema: 'https://shadcn-svelte.com/schema.json',
         tailwind: {
-          config: '',
           css: '../ui-theme/src/styles.css',
           baseColor: 'neutral',
-          cssVariables: true,
         },
         aliases: {
-          components: `${scope}/ui-react/components`,
-          utils: `${scope}/ui-react/lib/utils`,
-          ui: `${scope}/ui-react/components`,
-          lib: `${scope}/ui-react/lib`,
+          components: `${scope}/ui-svelte/components`,
+          utils: `${scope}/ui-svelte/lib/utils`,
+          ui: `${scope}/ui-svelte/components`,
+          lib: `${scope}/ui-svelte/lib`,
         },
-        iconLibrary: 'lucide',
+        typescript: true,
+        registry: 'https://shadcn-svelte.com/registry',
       }),
     ),
-    file(repoRoot, 'packages/ui-react/src/lib/utils.ts', UTILS_TS),
-    file(repoRoot, 'packages/ui-react/src/components/button.tsx', BUTTON_TSX),
+    file(repoRoot, 'packages/ui-svelte/src/index.ts', INDEX_TS),
+    file(repoRoot, 'packages/ui-svelte/src/lib/utils.ts', UTILS_TS),
+    file(repoRoot, 'packages/ui-svelte/src/components/button.svelte', BUTTON_SVELTE),
     file(
       repoRoot,
-      'packages/ui-react/tsconfig.json',
+      'packages/ui-svelte/tsconfig.json',
       json({
-        extends: `${scope}/typescript-config/react-library.json`,
+        extends: `${scope}/typescript-config/base.json`,
         include: ['src'],
-        exclude: ['node_modules', 'dist'],
+        exclude: ['node_modules'],
       }),
     ),
   ];

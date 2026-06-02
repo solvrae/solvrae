@@ -1,7 +1,7 @@
 {
-  "name": "@solvrae/scaffold",
+  "name": "@solvrae/adapter-sveltekit",
   "version": "0.0.0",
-  "description": "Solvrae scaffolding orchestration: adapter registry, init, and add-template planning",
+  "description": "Solvrae framework adapter for SvelteKit (Svelte family)",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -20,13 +20,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@solvrae/adapter-next": "workspace:*",
-    "@solvrae/adapter-nuxt": "workspace:*",
-    "@solvrae/adapter-sveltekit": "workspace:*",
-    "@solvrae/adapter-tanstack-start": "workspace:*",
-    "@solvrae/adapter-vite-react": "workspace:*",
-    "@solvrae/core": "workspace:*",
-    "@solvrae/ui-templates": "workspace:*"
+    "@solvrae/core": "workspace:*"
   },
   "devDependencies": {
     "@solvrae/config": "workspace:*",

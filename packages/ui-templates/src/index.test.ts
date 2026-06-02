@@ -34,7 +34,21 @@ describe('planUiPackage', () => {
     expect(paths.some((p) => p.endsWith('styles.css'))).toBe(false);
   });
 
-  it('throws for families not yet implemented', () => {
-    expect(() => planUiPackage('vue', { repoRoot: '/repo', scope: '@repo' })).toThrow(SolvraeError);
+  it('scaffolds a vue package', () => {
+    const paths = writePaths(planUiPackage('vue', { repoRoot: '/repo', scope: '@repo' }));
+    expect(paths).toContain('/repo/packages/ui-vue/src/components/button.vue');
+    expect(paths.some((p) => p.endsWith('styles.css'))).toBe(false);
+  });
+
+  it('scaffolds a svelte package with a svelte entry', () => {
+    const paths = writePaths(planUiPackage('svelte', { repoRoot: '/repo', scope: '@repo' }));
+    expect(paths).toContain('/repo/packages/ui-svelte/src/components/button.svelte');
+    expect(paths).toContain('/repo/packages/ui-svelte/src/index.ts');
+  });
+
+  it('throws for families not yet implemented (solid)', () => {
+    expect(() => planUiPackage('solid', { repoRoot: '/repo', scope: '@repo' })).toThrow(
+      SolvraeError,
+    );
   });
 });

@@ -116,7 +116,14 @@ export function planBaseRepo(opts: BaseRepoOptions): Action[] {
     tasks: {
       build: {
         dependsOn: ['^build'],
-        outputs: ['.next/**', '!.next/cache/**', 'dist/**'],
+        outputs: [
+          '.next/**',
+          '!.next/cache/**',
+          '.output/**',
+          '.svelte-kit/**',
+          'build/**',
+          'dist/**',
+        ],
       },
       dev: { cache: false, persistent: true },
       typecheck: { dependsOn: ['^build'] },
