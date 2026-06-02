@@ -50,7 +50,7 @@ async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]>
     private: true,
     type: 'module',
     scripts: {
-      dev: 'nuxt dev',
+      dev: 'nuxt dev --port 3001',
       build: 'nuxt build',
       preview: 'nuxt preview',
     },
@@ -67,6 +67,8 @@ async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]>
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
+  // Disable the interactive telemetry prompt so \`dev\` never blocks on stdin.
+  telemetry: false,
   css: ['./app/assets/css/main.css'],
   vite: {
     plugins: [tailwindcss()],

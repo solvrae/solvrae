@@ -36,13 +36,15 @@ describe('planUiPackage', () => {
 
   it('scaffolds a vue package', () => {
     const paths = writePaths(planUiPackage('vue', { repoRoot: '/repo', scope: '@repo' }));
-    expect(paths).toContain('/repo/packages/ui-vue/src/components/button.vue');
+    expect(paths).toContain('/repo/packages/ui-vue/src/components/button/Button.vue');
+    expect(paths).toContain('/repo/packages/ui-vue/src/components/button/index.ts');
     expect(paths.some((p) => p.endsWith('styles.css'))).toBe(false);
   });
 
   it('scaffolds a svelte package with a svelte entry', () => {
     const paths = writePaths(planUiPackage('svelte', { repoRoot: '/repo', scope: '@repo' }));
-    expect(paths).toContain('/repo/packages/ui-svelte/src/components/button.svelte');
+    expect(paths).toContain('/repo/packages/ui-svelte/src/components/button/button.svelte');
+    expect(paths).toContain('/repo/packages/ui-svelte/src/components/button/index.ts');
     expect(paths).toContain('/repo/packages/ui-svelte/src/index.ts');
   });
 

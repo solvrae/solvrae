@@ -48,7 +48,7 @@ async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]>
     private: true,
     type: 'module',
     scripts: {
-      dev: 'vite dev',
+      dev: 'vite dev --port 5174',
       build: 'vite build',
       preview: 'vite preview',
     },
@@ -111,7 +111,7 @@ let { children } = $props();
 `;
 
   const page = `<script lang="ts">
-import { Button } from '${sveltePkg}';
+import Button from '${sveltePkg}/components/button';
 </script>
 
 <main class="flex min-h-screen flex-col items-center justify-center gap-4 p-8">

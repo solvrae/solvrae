@@ -9,10 +9,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 `;
 
+const BUTTON_INDEX = `export { default } from './Button.vue';\n`;
+
 const BUTTON_VUE = `<script setup lang="ts">
 import { type VariantProps, cva } from 'class-variance-authority';
 import { computed } from 'vue';
-import { cn } from '../lib/utils';
+import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
@@ -69,7 +71,7 @@ export function planVueUiPackage(opts: UiTemplateOptions): Action[] {
         private: true,
         type: 'module',
         exports: {
-          './components/*': './src/components/*.vue',
+          './components/*': './src/components/*/index.ts',
           './lib/*': './src/lib/*.ts',
         },
         dependencies: {
@@ -110,7 +112,8 @@ export function planVueUiPackage(opts: UiTemplateOptions): Action[] {
       }),
     ),
     file(repoRoot, 'packages/ui-vue/src/lib/utils.ts', UTILS_TS),
-    file(repoRoot, 'packages/ui-vue/src/components/button.vue', BUTTON_VUE),
+    file(repoRoot, 'packages/ui-vue/src/components/button/Button.vue', BUTTON_VUE),
+    file(repoRoot, 'packages/ui-vue/src/components/button/index.ts', BUTTON_INDEX),
     file(
       repoRoot,
       'packages/ui-vue/tsconfig.json',

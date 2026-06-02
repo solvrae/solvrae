@@ -56,7 +56,7 @@ async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]>
     private: true,
     type: 'module',
     scripts: {
-      dev: 'vite dev',
+      dev: 'vite dev --port 5175',
       build: 'vite build',
       start: 'node .output/server/index.mjs',
     },

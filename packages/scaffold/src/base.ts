@@ -113,6 +113,7 @@ export function planBaseRepo(opts: BaseRepoOptions): Action[] {
 
   const turboJson = {
     $schema: 'https://turbo.build/schema.json',
+    ui: 'tui',
     tasks: {
       build: {
         dependsOn: ['^build'],

@@ -53,7 +53,7 @@ async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]>
     private: true,
     type: 'module',
     scripts: {
-      dev: 'vite',
+      dev: 'vite --port 5173',
       build: 'vite build',
       preview: 'vite preview',
       typecheck: 'tsc --noEmit',

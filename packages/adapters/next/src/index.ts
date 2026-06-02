@@ -55,7 +55,7 @@ async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]>
     version: '0.0.0',
     private: true,
     scripts: {
-      dev: 'next dev',
+      dev: 'next dev -p 3000',
       build: 'next build',
       start: 'next start',
       typecheck: 'tsc --noEmit',

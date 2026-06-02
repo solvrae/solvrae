@@ -204,8 +204,8 @@ async function runAddComponent(components: string[], flags: AddComponentFlags): 
     targets = present;
   } else {
     const selected = await multiselect({
-      message: `Add ${components.join(', ')} to which UI families?`,
-      options: present.map((f) => ({ value: f, label: `ui-${f}` })),
+      message: `Add ${components.join(', ')} to which UI families?  (↑/↓ move · space toggle · enter confirm)`,
+      options: present.map((f) => ({ value: f, label: `ui-${f}`, hint: f })),
       initialValues: present,
       required: true,
     });

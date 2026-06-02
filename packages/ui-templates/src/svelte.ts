@@ -9,14 +9,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 `;
 
-const INDEX_TS = `export { default as Button } from './components/button.svelte';
+const INDEX_TS = `export { default as Button } from './components/button';
 export { cn } from './lib/utils';
 `;
+
+const BUTTON_INDEX = `export { default } from './button.svelte';\n`;
 
 const BUTTON_SVELTE = `<script lang="ts">
 import { type VariantProps, cva } from 'class-variance-authority';
 import type { HTMLButtonAttributes } from 'svelte/elements';
-import { cn } from '../lib/utils';
+import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
@@ -76,7 +78,7 @@ export function planSvelteUiPackage(opts: UiTemplateOptions): Action[] {
         svelte: './src/index.ts',
         exports: {
           '.': { svelte: './src/index.ts', types: './src/index.ts' },
-          './components/*': './src/components/*.svelte',
+          './components/*': { svelte: './src/components/*/index.ts' },
           './lib/*': './src/lib/*.ts',
         },
         dependencies: {
@@ -119,7 +121,8 @@ export function planSvelteUiPackage(opts: UiTemplateOptions): Action[] {
     ),
     file(repoRoot, 'packages/ui-svelte/src/index.ts', INDEX_TS),
     file(repoRoot, 'packages/ui-svelte/src/lib/utils.ts', UTILS_TS),
-    file(repoRoot, 'packages/ui-svelte/src/components/button.svelte', BUTTON_SVELTE),
+    file(repoRoot, 'packages/ui-svelte/src/components/button/button.svelte', BUTTON_SVELTE),
+    file(repoRoot, 'packages/ui-svelte/src/components/button/index.ts', BUTTON_INDEX),
     file(
       repoRoot,
       'packages/ui-svelte/tsconfig.json',
