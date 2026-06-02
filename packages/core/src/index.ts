@@ -47,6 +47,15 @@ export {
 
 export { createConsoleLogger, createMemoryLogger } from './reporter';
 
+export {
+  type DependencySpec,
+  type VersionResolver,
+  type RegistryResolverOptions,
+  offlineResolver,
+  createRegistryResolver,
+  resolveAll,
+} from './version';
+
 export * from './adapter';
 
 export {

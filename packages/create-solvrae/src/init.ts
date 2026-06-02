@@ -5,7 +5,9 @@ import {
   type PackageManager,
   type Plan,
   SolvraeError,
+  type VersionResolver,
   createMemoryLogger,
+  offlineResolver,
   runInstall,
 } from '@solvrae/core';
 import { planThemePackage, planUiPackage, uiPackageName } from '@solvrae/ui-templates';
@@ -40,6 +42,8 @@ export interface InitOptions {
   packageManager: PackageManager;
   /** Full `name@version` spec for the root `packageManager` field. */
   packageManagerSpec?: string;
+  /** Version resolver (registry-backed online; defaults to offline/baseline). */
+  resolver?: VersionResolver;
   templateId: string;
   install: boolean;
 }
@@ -53,7 +57,7 @@ const FALLBACK_PM_VERSION: Record<PackageManager, string> = {
 };
 
 /** Compose the full init plan: base repo → theme → ui package → app → wiring → install. */
-export function planInit(opts: InitOptions): Plan {
+export async function planInit(opts: InitOptions): Promise<Plan> {
   const adapter = resolveAdapter(opts.templateId);
   const { family } = adapter;
   const uiPackage = uiPackageName(family);
@@ -62,6 +66,7 @@ export function planInit(opts: InitOptions): Plan {
 
   const ctx: AdapterContext = {
     repoRoot: opts.repoRoot,
+    versions: opts.resolver ?? offlineResolver,
     run: {
       cwd: opts.repoRoot,
       repoRoot: opts.repoRoot,
@@ -71,6 +76,11 @@ export function planInit(opts: InitOptions): Plan {
       logger: createMemoryLogger(),
     },
   };
+
+  const [appActions, wiringActions] = await Promise.all([
+    adapter.planApp(ctx, { name: opts.appName, scope: opts.scope, typescript: true }),
+    adapter.planWiring(ctx, { appName: opts.appName, scope: opts.scope, uiPackage }),
+  ]);
 
   const actions = [
     ...planBaseRepo({
@@ -82,8 +92,8 @@ export function planInit(opts: InitOptions): Plan {
     }),
     ...planThemePackage({ repoRoot: opts.repoRoot, scope: opts.scope }),
     ...planUiPackage(family, { repoRoot: opts.repoRoot, scope: opts.scope }),
-    ...adapter.planApp(ctx, { name: opts.appName, scope: opts.scope, typescript: true }),
-    ...adapter.planWiring(ctx, { appName: opts.appName, scope: opts.scope, uiPackage }),
+    ...appActions,
+    ...wiringActions,
   ];
 
   if (opts.install) {

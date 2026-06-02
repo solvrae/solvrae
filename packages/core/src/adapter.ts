@@ -1,6 +1,10 @@
 import type { Action } from './actions';
 import type { RunContext } from './context';
 import type { UiFamily } from './types';
+import type { VersionResolver } from './version';
+
+/** A value or a promise of it — planning may need async version resolution. */
+export type MaybePromise<T> = T | Promise<T>;
 
 /** Upstream versions an adapter is verified against. */
 export interface CompatibilityMatrix {
@@ -41,10 +45,12 @@ export interface Diagnostic {
   fix?: Action;
 }
 
-/** Context handed to adapters: the run context plus the resolved repo root. */
+/** Context handed to adapters: the run context, the repo root, and a version resolver. */
 export interface AdapterContext {
   run: RunContext;
   repoRoot: string;
+  /** Resolves dependency specs to exact versions (registry-backed or offline). */
+  versions: VersionResolver;
 }
 
 /**
@@ -60,14 +66,14 @@ export interface FrameworkAdapter {
   readonly family: UiFamily;
   readonly compatibility: CompatibilityMatrix;
 
-  /** Plan the app scaffold under `apps/<name>`. */
-  planApp(ctx: AdapterContext, opts: AppOptions): Action[];
+  /** Plan the app scaffold under `apps/<name>`. May resolve versions asynchronously. */
+  planApp(ctx: AdapterContext, opts: AppOptions): MaybePromise<Action[]>;
 
   /** Plan how the app consumes its UI package. */
-  planWiring(ctx: AdapterContext, opts: WiringOptions): Action[];
+  planWiring(ctx: AdapterContext, opts: WiringOptions): MaybePromise<Action[]>;
 
   /** Optional framework-specific tweaks to the UI package itself. */
-  planUiPackageOverrides?(ctx: AdapterContext, opts: UiPackageOptions): Action[];
+  planUiPackageOverrides?(ctx: AdapterContext, opts: UiPackageOptions): MaybePromise<Action[]>;
 
   /** Optional post-install verification used by `solvrae doctor`. */
   diagnose?(ctx: AdapterContext): Promise<Diagnostic[]>;

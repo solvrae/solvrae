@@ -7,8 +7,10 @@ import {
   type PackageManager,
   createConsoleLogger,
   createExecutorDeps,
+  createRegistryResolver,
   detectPackageManager,
   executePlan,
+  offlineResolver,
 } from '@solvrae/core';
 import { Command } from 'commander';
 import pc from 'picocolors';
@@ -23,6 +25,7 @@ interface CliFlags {
   install: boolean;
   yes: boolean;
   dryRun: boolean;
+  offline: boolean;
 }
 
 const PM_VALUES: PackageManager[] = ['pnpm', 'npm', 'yarn', 'bun'];
@@ -59,6 +62,7 @@ async function run(): Promise<void> {
     .option('--no-install', 'skip dependency installation')
     .option('-y, --yes', 'accept defaults, skip prompts', false)
     .option('--dry-run', 'print the plan without writing anything', false)
+    .option('--offline', 'use baseline versions instead of querying the registry', false)
     .parse();
 
   const flags = program.opts<CliFlags>();
@@ -109,6 +113,8 @@ async function run(): Promise<void> {
     bail(`Invalid --pm "${pm}". Use one of ${PM_VALUES.join(', ')}.`);
   if (!pm) pm = await detectPackageManager(process.cwd());
   const pmVersion = await detectPmVersion(pm);
+  const logger = createConsoleLogger('info');
+  const resolver = flags.offline ? offlineResolver : createRegistryResolver({ logger });
 
   const options: InitOptions = {
     repoRoot,
@@ -116,13 +122,13 @@ async function run(): Promise<void> {
     appName: 'web',
     scope: flags.scope,
     packageManager: pm,
+    resolver,
     templateId,
     install: flags.install,
   };
   if (pmVersion) options.packageManagerSpec = `${pm}@${pmVersion}`;
 
-  const plan = planInit(options);
-  const logger = createConsoleLogger('info');
+  const plan = await planInit(options);
 
   log.step(`Plan: ${plan.summary}`);
   if (flags.install && !flags.dryRun) log.info(`Installing dependencies with ${pm}…`);

@@ -1,9 +1,10 @@
-import { type AdapterContext, createMemoryLogger } from '@solvrae/core';
+import { type AdapterContext, createMemoryLogger, offlineResolver } from '@solvrae/core';
 import { describe, expect, it } from 'vitest';
 import adapter from './index';
 
 const ctx: AdapterContext = {
   repoRoot: '/repo',
+  versions: offlineResolver,
   run: {
     cwd: '/repo',
     repoRoot: '/repo',
@@ -20,8 +21,8 @@ describe('adapter-next', () => {
     expect(adapter.family).toBe('react');
   });
 
-  it('plans an app scaffold with the key files', () => {
-    const actions = adapter.planApp(ctx, { name: 'web', scope: '@repo', typescript: true });
+  it('plans an app scaffold with the key files', async () => {
+    const actions = await adapter.planApp(ctx, { name: 'web', scope: '@repo', typescript: true });
     const paths = actions.flatMap((a) => (a.kind === 'writeFile' ? [a.path] : []));
     expect(paths).toContain('/repo/apps/web/package.json');
     expect(paths).toContain('/repo/apps/web/next.config.ts');
@@ -29,8 +30,8 @@ describe('adapter-next', () => {
     expect(paths).toContain('/repo/apps/web/app/globals.css');
   });
 
-  it('wires the app to ui-theme and the ui package', () => {
-    const actions = adapter.planWiring(ctx, {
+  it('wires the app to ui-theme and the ui package', async () => {
+    const actions = await adapter.planWiring(ctx, {
       appName: 'web',
       scope: '@repo',
       uiPackage: 'ui-react',

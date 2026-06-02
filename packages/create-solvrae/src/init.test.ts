@@ -26,8 +26,8 @@ describe('resolveAdapter', () => {
 });
 
 describe('planInit', () => {
-  it('composes base + theme + ui + app + wiring, ending with install', () => {
-    const plan = planInit({ ...base, install: true });
+  it('composes base + theme + ui + app + wiring, ending with install', async () => {
+    const plan = await planInit({ ...base, install: true });
     const paths = plan.actions.flatMap((a) => (a.kind === 'writeFile' ? [a.path] : []));
 
     expect(paths).toContain('/repo/package.json'); // base repo
@@ -40,8 +40,8 @@ describe('planInit', () => {
     expect(last?.kind).toBe('runCommand');
   });
 
-  it('uses the workspaces field for non-pnpm managers', () => {
-    const plan = planInit({ ...base, packageManager: 'npm', install: false });
+  it('uses the workspaces field for non-pnpm managers', async () => {
+    const plan = await planInit({ ...base, packageManager: 'npm', install: false });
     const paths = plan.actions.flatMap((a) => (a.kind === 'writeFile' ? [a.path] : []));
     expect(paths).not.toContain('/repo/pnpm-workspace.yaml');
     expect(plan.actions.some((a) => a.kind === 'runCommand')).toBe(false);

@@ -3,9 +3,11 @@ import {
   type Action,
   type AdapterContext,
   type AppOptions,
+  type DependencySpec,
   type FrameworkAdapter,
   type WiringOptions,
   addDependency,
+  resolveAll,
   writeFile,
 } from '@solvrae/core';
 
@@ -17,12 +19,33 @@ function json(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-function planApp(ctx: AdapterContext, opts: AppOptions): Action[] {
+/** Runtime deps, with the range we support and a known-good offline baseline. */
+const RUNTIME_DEPS: Record<string, DependencySpec> = {
+  next: { range: '>=16 <17', baseline: '16.2.7' },
+  react: { range: '^19', baseline: '19.2.7' },
+  'react-dom': { range: '^19', baseline: '19.2.7' },
+};
+
+const DEV_DEPS: Record<string, DependencySpec> = {
+  '@tailwindcss/postcss': { range: '^4', baseline: '4.0.0' },
+  '@types/node': { range: '^22', baseline: '22.10.0' },
+  '@types/react': { range: '^19', baseline: '19.2.0' },
+  '@types/react-dom': { range: '^19', baseline: '19.2.0' },
+  tailwindcss: { range: '^4', baseline: '4.0.0' },
+  typescript: { range: '^5.7', baseline: '5.7.2' },
+};
+
+async function planApp(ctx: AdapterContext, opts: AppOptions): Promise<Action[]> {
   const { repoRoot } = ctx;
   const { scope, name } = opts;
   const dir = `apps/${name}`;
   const themePkg = `${scope}/ui-theme`;
   const reactPkg = `${scope}/ui-react`;
+
+  const [deps, devDeps] = await Promise.all([
+    resolveAll(ctx.versions, RUNTIME_DEPS),
+    resolveAll(ctx.versions, DEV_DEPS),
+  ]);
 
   const packageJson = json({
     name,
@@ -34,19 +57,10 @@ function planApp(ctx: AdapterContext, opts: AppOptions): Action[] {
       start: 'next start',
       typecheck: 'tsc --noEmit',
     },
-    dependencies: {
-      next: '^15.1.0',
-      react: '^19.0.0',
-      'react-dom': '^19.0.0',
-    },
+    dependencies: deps,
     devDependencies: {
       [`${scope}/typescript-config`]: 'workspace:*',
-      '@tailwindcss/postcss': '^4.0.0',
-      '@types/node': '^22.10.0',
-      '@types/react': '^19.0.0',
-      '@types/react-dom': '^19.0.0',
-      tailwindcss: '^4.0.0',
-      typescript: '^5.7.2',
+      ...devDeps,
     },
   });
 
@@ -155,7 +169,7 @@ const adapter: FrameworkAdapter = {
   displayName: 'Next.js',
   family: 'react',
   compatibility: {
-    framework: '>=15 <16',
+    framework: '>=16 <17',
     tailwind: '^4',
     shadcn: '>=2',
   },
