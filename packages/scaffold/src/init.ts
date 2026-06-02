@@ -1,37 +1,23 @@
-import nextAdapter from '@solvrae/adapter-next';
 import {
   type AdapterContext,
-  type FrameworkAdapter,
   type PackageManager,
   type Plan,
-  SolvraeError,
   type VersionResolver,
   createMemoryLogger,
   offlineResolver,
   runInstall,
 } from '@solvrae/core';
 import { planThemePackage, planUiPackage, uiPackageName } from '@solvrae/ui-templates';
+import { resolveAdapter } from './adapters';
 import { planBaseRepo } from './base';
 
-/** Built-in adapters available in M1. Dynamic resolution arrives later. */
-const ADAPTERS: Record<string, FrameworkAdapter> = {
-  next: nextAdapter,
+/** Pinned fallbacks used only when the live pm version can't be detected. */
+const FALLBACK_PM_VERSION: Record<PackageManager, string> = {
+  pnpm: '9.15.0',
+  npm: '10.9.0',
+  yarn: '4.6.0',
+  bun: '1.2.0',
 };
-
-export function availableTemplates(): string[] {
-  return Object.keys(ADAPTERS);
-}
-
-export function resolveAdapter(templateId: string): FrameworkAdapter {
-  const adapter = ADAPTERS[templateId];
-  if (!adapter) {
-    throw new SolvraeError(
-      'UNKNOWN_TEMPLATE',
-      `Unknown template "${templateId}". Available: ${availableTemplates().join(', ')}.`,
-    );
-  }
-  return adapter;
-}
 
 export interface InitOptions {
   /** Absolute target directory. */
@@ -47,14 +33,6 @@ export interface InitOptions {
   templateId: string;
   install: boolean;
 }
-
-/** Pinned fallbacks used only when the live pm version can't be detected. */
-const FALLBACK_PM_VERSION: Record<PackageManager, string> = {
-  pnpm: '9.15.0',
-  npm: '10.9.0',
-  yarn: '4.6.0',
-  bun: '1.2.0',
-};
 
 /** Compose the full init plan: base repo → theme → ui package → app → wiring → install. */
 export async function planInit(opts: InitOptions): Promise<Plan> {

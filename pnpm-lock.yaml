@@ -46,6 +46,62 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.19.19)
 
+  packages/adapters/vite-react:
+    dependencies:
+      '@solvrae/core':
+        specifier: workspace:*
+        version: link:../../core
+    devDependencies:
+      '@solvrae/config':
+        specifier: workspace:*
+        version: link:../../config
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.1(postcss@8.5.15)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.19)
+
+  packages/cli:
+    dependencies:
+      '@clack/prompts':
+        specifier: ^0.9.0
+        version: 0.9.1
+      '@solvrae/core':
+        specifier: workspace:*
+        version: link:../core
+      '@solvrae/scaffold':
+        specifier: workspace:*
+        version: link:../scaffold
+      commander:
+        specifier: ^13.0.0
+        version: 13.1.0
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
+    devDependencies:
+      '@solvrae/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.1(postcss@8.5.15)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.19)
+
   packages/config: {}
 
   packages/core:
@@ -81,21 +137,49 @@ importers:
       '@clack/prompts':
         specifier: ^0.9.0
         version: 0.9.1
-      '@solvrae/adapter-next':
-        specifier: workspace:*
-        version: link:../adapters/next
       '@solvrae/core':
         specifier: workspace:*
         version: link:../core
-      '@solvrae/ui-templates':
+      '@solvrae/scaffold':
         specifier: workspace:*
-        version: link:../ui-templates
+        version: link:../scaffold
       commander:
         specifier: ^13.0.0
         version: 13.1.0
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
+    devDependencies:
+      '@solvrae/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.19
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.1(postcss@8.5.15)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.19)
+
+  packages/scaffold:
+    dependencies:
+      '@solvrae/adapter-next':
+        specifier: workspace:*
+        version: link:../adapters/next
+      '@solvrae/adapter-vite-react':
+        specifier: workspace:*
+        version: link:../adapters/vite-react
+      '@solvrae/core':
+        specifier: workspace:*
+        version: link:../core
+      '@solvrae/ui-templates':
+        specifier: workspace:*
+        version: link:../ui-templates
     devDependencies:
       '@solvrae/config':
         specifier: workspace:*

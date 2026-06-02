@@ -84,10 +84,10 @@ ${pm} install
 ${pm} run dev
 \`\`\`
 
-## Add components
+## Add another framework
 
 \`\`\`bash
-${pm} --filter @repo/ui-react dlx shadcn@latest add card
+${pm} dlx solvrae add template vite-react
 \`\`\`
 `;
 }

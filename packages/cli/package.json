@@ -1,11 +1,11 @@
 {
-  "name": "create-solvrae",
+  "name": "solvrae",
   "version": "0.0.0",
-  "description": "Scaffold a cross-framework Turborepo with shadcn/ui, wired by Solvrae",
+  "description": "The Solvrae CLI — add frameworks and inspect a cross-framework Turborepo",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "create-solvrae": "./dist/bin.js"
+    "solvrae": "./dist/bin.js"
   },
   "files": ["dist"],
   "scripts": {

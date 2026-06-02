@@ -1,26 +1,26 @@
 {
-  "name": "create-solvrae",
+  "name": "@solvrae/adapter-vite-react",
   "version": "0.0.0",
-  "description": "Scaffold a cross-framework Turborepo with shadcn/ui, wired by Solvrae",
+  "description": "Solvrae framework adapter for Vite + React (React family)",
   "license": "MIT",
   "type": "module",
-  "bin": {
-    "create-solvrae": "./dist/bin.js"
-  },
+  "sideEffects": false,
   "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@clack/prompts": "^0.9.0",
-    "@solvrae/core": "workspace:*",
-    "@solvrae/scaffold": "workspace:*",
-    "commander": "^13.0.0",
-    "picocolors": "^1.1.1"
+    "@solvrae/core": "workspace:*"
   },
   "devDependencies": {
     "@solvrae/config": "workspace:*",

@@ -12,9 +12,9 @@ import {
   executePlan,
   offlineResolver,
 } from '@solvrae/core';
+import { type InitOptions, availableTemplates, planInit } from '@solvrae/scaffold';
 import { Command } from 'commander';
 import pc from 'picocolors';
-import { type InitOptions, availableTemplates, planInit } from './init';
 
 const execFileAsync = promisify(execFile);
 
