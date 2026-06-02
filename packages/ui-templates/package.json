@@ -1,11 +1,13 @@
 {
   "name": "@solvrae/ui-templates",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "UI package templates for Solvrae: the shared theme and per-family shadcn UI packages",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

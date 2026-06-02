@@ -1,13 +1,15 @@
 {
   "name": "solvrae",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The Solvrae CLI — add frameworks and inspect a cross-framework Turborepo",
   "license": "MIT",
   "type": "module",
   "bin": {
     "solvrae": "./dist/bin.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

@@ -1,11 +1,13 @@
 {
   "name": "@solvrae/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Framework-agnostic engine for Solvrae: context, package-manager, plan/execute, registry schemas, and the adapter contract",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

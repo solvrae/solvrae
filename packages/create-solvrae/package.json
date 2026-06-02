@@ -1,13 +1,15 @@
 {
   "name": "create-solvrae",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Scaffold a cross-framework Turborepo with shadcn/ui, wired by Solvrae",
   "license": "MIT",
   "type": "module",
   "bin": {
     "create-solvrae": "./dist/bin.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

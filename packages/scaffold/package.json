@@ -1,11 +1,13 @@
 {
   "name": "@solvrae/scaffold",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Solvrae scaffolding orchestration: adapter registry, init, and add-template planning",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

@@ -1,11 +1,13 @@
 {
   "name": "@solvrae/adapter-vite-react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Solvrae framework adapter for Vite + React (React family)",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
