@@ -11,7 +11,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ planned.
 - [x] `@solvrae/core`: types, errors, `pm`, `fs`, plan/executor, reporter, adapter contract
 - [x] Action types + pure planner/executor with rollback + `--dry-run`
 - [x] Zod schemas for `components.json` and registry items
-- [ ] Create the **`solvrae` GitHub org** + **`solvrae` npm org** (publish prerequisite)
+- [x] **`solvrae` GitHub org** created; **`solvrae` npm org** created with the first publish
 
 ## M1 — First vertical slice (React/Next) ✅
 
@@ -49,7 +49,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ planned.
 - [ ] Registry-first `add component` (offline-capable, replacing CLI delegation)
 - [ ] Nightly CI against upstream `latest` (early-warning for shadcn/Tailwind/frameworks)
 - [ ] Adapter generator (`gen:adapter`) + adapter authoring guide
-- [ ] Publish to npm
+- [x] **Publish the first alpha to npm** (`create-solvrae`, `solvrae`, `@solvrae/*` at `0.x`)
 
 ## Supported templates
 

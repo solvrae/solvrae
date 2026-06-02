@@ -28,5 +28,29 @@
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "author": "Febri Ardiansyah",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solvrae/solvrae.git",
+    "directory": "packages/adapters/tanstack-start"
+  },
+  "homepage": "https://github.com/solvrae/solvrae#readme",
+  "bugs": "https://github.com/solvrae/solvrae/issues",
+  "keywords": [
+    "solvrae",
+    "turborepo",
+    "monorepo",
+    "shadcn",
+    "shadcn-ui",
+    "tailwindcss",
+    "scaffolding",
+    "cli",
+    "adapter",
+    "tanstack",
+    "react"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

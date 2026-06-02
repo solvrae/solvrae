@@ -93,14 +93,15 @@ strict by default.
 
 ## Status
 
-🚧 **Pre-alpha (not yet published to npm).** The engine is implemented and verified
-end-to-end: scaffolding all templates, `add template` with UI-family reuse,
-`add component` across React/Vue/Svelte, and `doctor --fix` — a polyglot
+> ⚠️ **Alpha (0.x).** Solvrae is usable today and verified end-to-end — but APIs,
+> generated output, and the template set may change between releases, and it is not
+> yet production-hardened. Pin a version and expect breaking changes until `1.0`.
+> Feedback and bug reports are very welcome → [issues](https://github.com/solvrae/solvrae/issues).
+
+What works today: scaffolding all five templates, `add template` with UI-family
+reuse, `add component` across React/Vue/Svelte, and `doctor --fix` — a polyglot
 `next` + `nuxt` + `sveltekit` repo builds with one shared `ui-theme`. See the
 [roadmap](docs/10-roadmap.md) for what's done and what's next.
-
-While unpublished, run it from a local build (`pnpm build`) — see
-[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing
 
